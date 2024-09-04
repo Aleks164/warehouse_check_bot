@@ -64,9 +64,9 @@ const startBot = () => {
         ) {
           errors += `Склад - ${
             currentCheck[id][date].warehouseName
-          } дата: ${new Date(currentCheck[id][date].date).toLocaleString()} ${
-            prevCheck[id][date]?.coefficient || "-"
-          } ---> ${
+          } дата: ${new Date(currentCheck[id][date].date).toLocaleString(
+            "ru-RU"
+          )} ${prevCheck[id][date]?.coefficient || "-"} ---> ${
             currentCheck[id][date].coefficient
           }.\n----------------------------------\n`;
         }
