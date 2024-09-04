@@ -11,7 +11,6 @@ export interface WarehousesCoefficients {
 
 const baseLink =
   "https://supplies-api.wildberries.ru/api/v1/acceptance/coefficients?warehouseIDs=";
-console.log("SUPPLIES_ID: ", process.env.SUPPLIES_ID);
 async function getCoefficients(ids: string[]) {
   return get(baseLink + ids, {
     headers: {

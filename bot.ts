@@ -10,19 +10,15 @@ interface WarehousesById {
 const key = process.env.BOT_TOKEN as string;
 const targetId = process.env.HANSTER_ID as string;
 const myId = process.env.MY_ID as string;
-console.log("key:", key);
 
-console.log("targetId:", targetId);
-
-console.log("myId:", myId);
 const timeInterval = 1000 * 20; // 20 second
 
 let prevCheck: any = {};
 let currentCheck: any = {};
 let checkSummary = "";
 const warehousesIds = Object.keys(warehouses);
+const isCheckRunning = { current: true };
 let lastCheckTime = "";
-let isCheckRunning = true;
 let timeOutId: any;
 
 // const helpMessage =
@@ -55,7 +51,7 @@ const startBot = () => {
     if (!Object.keys(prevCheck).length) prevCheck = newMap;
     else prevCheck = currentCheck;
     currentCheck = newMap;
-
+    checkSummary = "";
     for (const id in currentCheck) {
       for (const date in currentCheck[id]) {
         checkSummary += `${
@@ -66,14 +62,13 @@ const startBot = () => {
         if (
           prevCheck[id][date].coefficient !== currentCheck[id][date].coefficient
         ) {
-          errors += `Коэффициент склада ${
+          errors += `Склад - ${
             currentCheck[id][date].warehouseName
-          } дата : ${currentCheck[id][date].date.replace(
-            ":00Z",
-            ""
-          )} был изменен с ${prevCheck[id][date]?.coefficient || "-"} на ${
+          } дата: ${new Date(currentCheck[id][date].date).toLocaleString()} ${
+            prevCheck[id][date]?.coefficient || "-"
+          } ---> ${
             currentCheck[id][date].coefficient
-          }.\n`;
+          }.\n----------------------------------\n`;
         }
       }
     }
@@ -82,8 +77,8 @@ const startBot = () => {
       ids.forEach((id) => bot.telegram.sendMessage(id, errors));
     }
     await new Promise((resolve) => setTimeout(resolve, timeInterval));
-    console.log(isCheckRunning);
-    if (isCheckRunning) tryCheck();
+    console.log(isCheckRunning.current);
+    if (isCheckRunning.current) tryCheck();
   };
 
   tryCheck();
@@ -101,14 +96,14 @@ const startBot = () => {
       return;
     switch (ctx.update.message.text) {
       case "/start": {
-        if (isCheckRunning) return ctx.reply("Bot is already running");
-        isCheckRunning = true;
+        if (isCheckRunning.current) return ctx.reply("Bot is already running");
+        isCheckRunning.current = true;
 
         return ctx.reply("Bot started");
       }
       case "/stop": {
         clearTimeout(timeOutId);
-        isCheckRunning = false;
+        isCheckRunning.current = false;
         return ctx.reply("Bot stopped");
       }
       case "/lastCheck": {
