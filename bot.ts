@@ -12,8 +12,8 @@ const targetId = process.env.HANSTER_ID as string;
 const myId = process.env.MY_ID as string;
 const timeInterval = 1000 * 20; // 20 second
 
-let prevCheck: WarehousesById = {};
-let currentCheck: WarehousesById = {};
+let prevCheck: any = {};
+let currentCheck: any = {};
 let checkSummary = "";
 const warehousesIds = Object.keys(warehouses);
 let lastCheckTime = "";
@@ -24,7 +24,7 @@ let timeOutId: any;
 //   "Основные комманды:\n/start - начать проверку\n/lastCheck - последний результат\n/stop - остановить проверку\n/help - Основные комманды";
 const helpMessage = "Основные комманды:\n/lastCheck - последний результат";
 
-export const startBot = () => {
+const startBot = () => {
   const bot = new Telegraf(key);
   const ids = [targetId, myId];
 
@@ -120,3 +120,5 @@ export const startBot = () => {
   process.once("SIGINT", () => bot.stop("SIGINT"));
   process.once("SIGTERM", () => bot.stop("SIGTERM"));
 };
+
+startBot();
