@@ -62,9 +62,12 @@ const startBot = () => {
         ) {
           errors += `Коэффициент склада ${
             currentCheck[id][date].warehouseName
-          } дата : ${currentCheck[id][date].warehouseName} был изменен с ${
-            prevCheck[id][date]?.coefficient || "-"
-          } на ${currentCheck[id][date].coefficient}.\n`;
+          } дата : ${currentCheck[id][date].date.replace(
+            ":00Z",
+            ""
+          )} был изменен с ${prevCheck[id][date]?.coefficient || "-"} на ${
+            currentCheck[id][date].coefficient
+          }.\n`;
         }
       }
     }
