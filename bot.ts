@@ -77,7 +77,6 @@ const startBot = () => {
       ids.forEach((id) => bot.telegram.sendMessage(id, errors));
     }
     await new Promise((resolve) => setTimeout(resolve, timeInterval));
-    console.log(isCheckRunning.current);
     if (isCheckRunning.current) tryCheck();
   };
 
