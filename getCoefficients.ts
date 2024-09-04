@@ -24,7 +24,8 @@ async function getCoefficients(ids: string[]) {
 
       return data.filter((item) => item.boxTypeName === "Короба");
     })
-    .catch(() => {
+    .catch((e) => {
+      console.log(e.message);
       return [
         {
           date: "error",
