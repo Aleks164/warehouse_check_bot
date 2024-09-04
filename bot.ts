@@ -10,6 +10,11 @@ interface WarehousesById {
 const key = process.env.BOT_TOKEN as string;
 const targetId = process.env.HANSTER_ID as string;
 const myId = process.env.MY_ID as string;
+console.log("key:", key);
+
+console.log("targetId:", targetId);
+
+console.log("myId:", myId);
 const timeInterval = 1000 * 20; // 20 second
 
 let prevCheck: any = {};
@@ -48,6 +53,7 @@ const startBot = () => {
     }, {});
 
     if (!Object.keys(prevCheck).length) prevCheck = newMap;
+    else prevCheck = currentCheck;
     currentCheck = newMap;
 
     for (const id in currentCheck) {
@@ -76,6 +82,7 @@ const startBot = () => {
       ids.forEach((id) => bot.telegram.sendMessage(id, errors));
     }
     await new Promise((resolve) => setTimeout(resolve, timeInterval));
+    console.log(isCheckRunning);
     if (isCheckRunning) tryCheck();
   };
 
