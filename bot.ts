@@ -11,7 +11,7 @@ const key = process.env.BOT_TOKEN as string;
 const targetId = process.env.HANSTER_ID as string;
 const myId = process.env.MY_ID as string;
 
-const timeInterval = 1000 * 20; // 20 second
+const timeInterval = 1000 * 10; // 20 second
 
 let prevCheck: any = {};
 let currentCheck: any = {};
