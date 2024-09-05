@@ -60,6 +60,7 @@ const startBot = () => {
           currentCheck[id][date].coefficient
         }\n`;
         if (
+          !prevCheck[id][date]?.coefficient ||
           prevCheck[id][date].coefficient !== currentCheck[id][date].coefficient
         ) {
           errors += `Склад - ${
