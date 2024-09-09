@@ -1,4 +1,4 @@
-export const warehouses = {
+const warehouses = {
   206348: {
     ID: 206348,
     name: "Тула",
@@ -30,3 +30,5 @@ export const warehouses = {
     acceptsQR: false,
   },
 };
+
+module.exports = { warehouses };
