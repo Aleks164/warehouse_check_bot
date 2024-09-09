@@ -42,42 +42,44 @@ const startBot = async () => {
       lastCheckTime = new Date().toLocaleString("ru-RU", {
         timeZone: "Europe/Moscow",
       });
-      let errors = "";
-      const newMap = warehousesCoef.reduce((acc, curr) => {
-        if (!acc[curr.warehouseID]) acc[curr.warehouseID] = {};
-        acc[curr.warehouseID][curr.date] = curr;
-        return acc;
-      }, {});
+      if (warehousesCoef.length) {
+        let errors = "";
+        const newMap = warehousesCoef.reduce((acc, curr) => {
+          if (!acc[curr.warehouseID]) acc[curr.warehouseID] = {};
+          acc[curr.warehouseID][curr.date] = curr;
+          return acc;
+        }, {});
 
-      if (!Object.keys(prevCheck).length) prevCheck = newMap;
-      else prevCheck = currentCheck;
-      currentCheck = newMap;
-      checkSummary = "";
-      for (const id in currentCheck) {
-        for (const date in currentCheck[id]) {
-          checkSummary += `${
-            currentCheck[id][date].warehouseName
-          } - ${currentCheck[id][date].date.replace(":00Z", "")} - ${
-            currentCheck[id][date].coefficient
-          }\n`;
-          if (
-            !prevCheck[id][date]?.coefficient ||
-            prevCheck[id][date].coefficient !==
-              currentCheck[id][date].coefficient
-          ) {
-            errors += `Склад - ${
+        if (!Object.keys(prevCheck).length) prevCheck = newMap;
+        else prevCheck = currentCheck;
+        currentCheck = newMap;
+        checkSummary = "";
+        for (const id in currentCheck) {
+          for (const date in currentCheck[id]) {
+            checkSummary += `${
               currentCheck[id][date].warehouseName
-            } дата: ${new Date(currentCheck[id][date].date).toLocaleString(
-              "ru-RU"
-            )} ${prevCheck[id][date]?.coefficient || "-"} ---> ${
+            } - ${currentCheck[id][date].date.replace(":00Z", "")} - ${
               currentCheck[id][date].coefficient
-            }.\n----------------------------------\n`;
+            }\n`;
+            if (
+              !prevCheck[id][date]?.coefficient ||
+              prevCheck[id][date].coefficient !==
+                currentCheck[id][date].coefficient
+            ) {
+              errors += `Склад - ${
+                currentCheck[id][date].warehouseName
+              } дата: ${new Date(currentCheck[id][date].date).toLocaleString(
+                "ru-RU"
+              )} ${prevCheck[id][date]?.coefficient || "-"} ---> ${
+                currentCheck[id][date].coefficient
+              }.\n----------------------------------\n`;
+            }
           }
         }
-      }
 
-      if (errors) {
-        ids.forEach((id) => bot.telegram.sendMessage(id, errors));
+        if (errors) {
+          ids.forEach((id) => bot.telegram.sendMessage(id, errors));
+        }
       }
       await new Promise((resolve) => setTimeout(resolve, timeInterval));
     } catch (e) {
