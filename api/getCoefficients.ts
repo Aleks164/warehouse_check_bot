@@ -1,10 +1,11 @@
-const get = require("axios");
-require("dotenv/config");
+import get from "axios";
+import "dotenv/config";
+import { WarehousesCoefficient } from "./types";
 
 const baseLink =
   "https://supplies-api.wildberries.ru/api/v1/acceptance/coefficients?warehouseIDs=";
-async function getCoefficients(ids) {
-  return get(baseLink + ids, {
+async function getCoefficients(ids: string[]) {
+  return get<WarehousesCoefficient[]>(baseLink + ids, {
     headers: {
       "Content-Type": "application/json",
       Authorization: process.env.SUPPLIES_ID,
@@ -20,4 +21,4 @@ async function getCoefficients(ids) {
     });
 }
 
-module.exports = { getCoefficients };
+export default getCoefficients;

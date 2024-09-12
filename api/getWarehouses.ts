@@ -13,15 +13,7 @@ async function getWarehouses() {
       return response.data;
     })
     .catch(() => {
-      return [
-        {
-          date: "error",
-          coefficient: "error",
-          warehouseID: "error",
-          warehouseName: "error",
-          boxTypeName: "error",
-        },
-      ];
+      return [];
     });
 }
 

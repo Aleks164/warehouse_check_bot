@@ -1,10 +1,10 @@
-function getFormattedDateAsString(date) {
+function getFormattedDateAsString(date?: string | number | Date) {
   if (date instanceof Date)
     return date.toLocaleString("ru-RU", {
       timeZone: "Europe/Moscow",
     });
-  const newDate = new Date(date);
-  if (!date || isNaN(newDate.getTime()))
+
+  if (!date || isNaN(new Date(date).getTime()))
     return new Date().toLocaleString("ru-RU", {
       timeZone: "Europe/Moscow",
     });
@@ -13,4 +13,4 @@ function getFormattedDateAsString(date) {
   });
 }
 
-module.exports = { getFormattedDateAsString };
+export default getFormattedDateAsString;

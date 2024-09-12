@@ -2,9 +2,9 @@
   "name": "bot",
   "version": "1.0.0",
   "description": "",
-  "main": "bot.js",
+  "main": "bot.ts",
   "scripts": {
-    "start": "bot.js"
+    "start": "bot.ts"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +13,6 @@
     "axios": "^1.7.3",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
-    "jsdom": "^24.1.1",
     "telegraf": "^4.16.3",
     "ts-node": "^10.9.2"
   }
