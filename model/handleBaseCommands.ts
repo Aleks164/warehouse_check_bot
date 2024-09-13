@@ -32,7 +32,7 @@ function handleBaseCommands(
       resultMessage = "check later";
       break;
     }
-    case "/lastCheck": {
+    case "/lastcheck": {
       resultMessage = checkSummary
         ? lastCheckTime + "\n" + checkSummary
         : "wait for the result..., check later";

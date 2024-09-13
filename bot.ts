@@ -84,7 +84,7 @@ bot.on("message", (ctx) => {
     ctx.update.message.from.username ||
       ctx.update.message.from.first_name + " : " + message
   );
-  if (ctx.update.message.from.id !== +myId && message !== "/lastCheck") return;
+
   if (complexCommands.some((template) => message.includes(template))) {
     const resultMessage = handleComplexCommands(message, filters);
     return ctx.reply(resultMessage);
