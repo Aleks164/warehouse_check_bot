@@ -1,10 +1,7 @@
 import { Telegraf } from "telegraf";
-import { getFormattedDateAsString, getChunkedString, sleep } from "./utils";
-import { getCoefficients } from "./api";
+import { getFormattedDateAsString } from "./utils";
 import {
   Filters,
-  getCheckSummary,
-  getFilteredCoefficients,
   WarehousesByDateByIdMap,
   handleComplexCommands,
   checkWarehouseCoefficients,
@@ -76,27 +73,32 @@ const doCheck = async () => {
 timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
 
 bot.on("message", (ctx) => {
-  if (!("text" in ctx.update.message)) return;
-  const message = ctx.update.message.text.toLowerCase();
+  try {
+    if (!("text" in ctx.update.message)) return;
+    const message = ctx.update.message.text.toLowerCase();
 
-  bot.telegram.sendMessage(
-    myId,
-    ctx.update.message.from.username ||
-      ctx.update.message.from.first_name + " : " + message
-  );
-
-  if (complexCommands.some((template) => message.includes(template))) {
-    const resultMessage = handleComplexCommands(message, filters);
-    return ctx.reply(resultMessage);
-  } else {
-    const chunkedMessage = handleBaseCommands(
-      ctx.update.message.text,
-      checkSummary,
-      lastCheckTime,
-      helpMessage,
-      timeOutId
+    bot.telegram.sendMessage(
+      myId,
+      ctx.update.message.from.username ||
+        ctx.update.message.from.first_name + " : " + message
     );
-    chunkedMessage.forEach((string) => ctx.reply(string));
+
+    if (complexCommands.some((template) => message.includes(template))) {
+      const resultMessage = handleComplexCommands(message, filters);
+      return ctx.reply(resultMessage);
+    } else {
+      console.log(message);
+      const chunkedMessage = handleBaseCommands(
+        message,
+        checkSummary,
+        lastCheckTime,
+        helpMessage,
+        timeOutId
+      );
+      chunkedMessage.forEach((string) => ctx.reply(string));
+    }
+  } catch (e: any) {
+    bot.telegram.sendMessage(myId, e.message);
   }
 });
 
