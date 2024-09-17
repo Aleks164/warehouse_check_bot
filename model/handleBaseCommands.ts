@@ -4,6 +4,7 @@ import {
   MESSAGE_LENGTH_LIMIT,
   ROW_TEMPLATE_REPLACE_REG_EXP,
 } from "./const";
+import { Filters } from "./types";
 
 function handleBaseCommands(
   command: string,
@@ -11,6 +12,7 @@ function handleBaseCommands(
   lastCheckTime: string,
   helpMessage: string,
   allCoefficients: string,
+  filters: Filters,
   timerId: NodeJS.Timeout | string | number | undefined
 ) {
   let resultMessage: string;
@@ -27,6 +29,21 @@ function handleBaseCommands(
     case "/stop": {
       clearTimeout(timerId);
       resultMessage = "Bot stopped";
+      break;
+    }
+    case "/filter": {
+      resultMessage = "Фильтры - ";
+      if (filters.date)
+        resultMessage +=
+          "Фильтр по дате: " + filters.date.format("DD.MM.YYYY") + ", ";
+      if (filters.coefficient.value !== null && filters.coefficient.sign)
+        resultMessage +=
+          "Фильтр по коэффициенту: " +
+          filters.coefficient.sign +
+          filters.coefficient.value +
+          ", ";
+      if (filters.wh) resultMessage += "Фильтр по складу: " + filters.wh;
+
       break;
     }
     case "/lastcheck": {

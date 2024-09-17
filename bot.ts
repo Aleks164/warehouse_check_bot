@@ -35,8 +35,7 @@ const filters: Filters = {
 };
 const complexCommands = ["date", "coef", "wh"];
 const whList = ["Электросталь", "Казань", "Коледино", "Тула"];
-// const ids = [targetId, myId, main];
-const ids = [myId];
+const ids = [targetId, myId, main];
 
 let prevCheck: WarehousesByDateByIdMap = {};
 let currentCheck: WarehousesByDateByIdMap = {};
@@ -52,6 +51,7 @@ const helpMessage = `Основные команды:
    \n/date - установка фильтра по дате 
    \n/coef - установка фильтра по коэффициенту  
    \n/wh - установка фильтра по складу  
+   \n/filter - текущее фильтры  
    \n/help - Основные команды`;
 
 const bot = new Telegraf(key);
@@ -124,6 +124,7 @@ bot.on("message", (ctx) => {
         lastCheckTime,
         helpMessage,
         allCoefficients,
+        filters,
         timeOutId
       );
       chunkedMessage.forEach((string) => ctx.reply(string || "---"));
