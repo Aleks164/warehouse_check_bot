@@ -64,7 +64,7 @@ const doCheck = async () => {
 
     timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
   } catch (e: any) {
-    bot.telegram.sendMessage(myId, e.message);
+    bot.telegram.sendMessage(myId, e.message || "someError");
 
     timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
   }
@@ -79,8 +79,9 @@ bot.on("message", (ctx) => {
 
     bot.telegram.sendMessage(
       myId,
-      ctx.update.message.from.username ||
-        ctx.update.message.from.first_name + " : " + message
+      (ctx.update.message.from.username || ctx.update.message.from.first_name) +
+        " : " +
+        message
     );
 
     if (complexCommands.some((template) => message.includes(template))) {
@@ -98,7 +99,7 @@ bot.on("message", (ctx) => {
       chunkedMessage.forEach((string) => ctx.reply(string));
     }
   } catch (e: any) {
-    bot.telegram.sendMessage(myId, e.message);
+    bot.telegram.sendMessage(myId, e.message || "someError");
   }
 });
 
