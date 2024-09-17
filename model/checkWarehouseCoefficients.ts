@@ -6,6 +6,7 @@ import {
   MESSAGE_LENGTH_LIMIT,
   ROW_TEMPLATE_REPLACE_REG_EXP,
   BORDER_ROW,
+  BORDER_ROW_TEMP,
 } from "./const";
 import { Filters, WarehousesByDateByIdMap } from "./types";
 const warehousesIds = Object.keys(warehouses);
@@ -17,11 +18,18 @@ const checkWarehouseCoefficients = async (
 ) => {
   const warehousesCoefficients = await getCoefficients(warehousesIds);
   let checkSummary = "";
+  let allCoefficients = "";
   let chunkedDeviation: string[] = [];
 
   if (warehousesCoefficients.length) {
+    allCoefficients = warehousesCoefficients.reduce((acc, curr) => {
+      acc += `${curr.warehouseName} - ${curr.date.replace(":00Z", "")} - ${
+        curr.coefficient
+      }${BORDER_ROW_TEMP}`;
+      return acc;
+    }, allCoefficients);
     const newMap = getFilteredCoefficients(warehousesCoefficients, filters);
-
+    console.log(Object.values(newMap));
     if (!Object.keys(prevCheck).length) prevCheck = newMap;
     else prevCheck = currentCheck;
     currentCheck = newMap;
@@ -40,6 +48,7 @@ const checkWarehouseCoefficients = async (
     checkSummary,
     currentCheck,
     prevCheck,
+    allCoefficients,
   };
 };
 

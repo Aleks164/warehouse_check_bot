@@ -7,9 +7,10 @@ import {
 
 function handleBaseCommands(
   command: string,
-  checkSummary: string,
+  checkSummary: string | null,
   lastCheckTime: string,
   helpMessage: string,
+  allCoefficients: string,
   timerId: NodeJS.Timeout | string | number | undefined
 ) {
   let resultMessage: string;
@@ -35,7 +36,14 @@ function handleBaseCommands(
     case "/lastcheck": {
       resultMessage = checkSummary
         ? lastCheckTime + "\n" + checkSummary
-        : "wait for the result..., check later";
+        : checkSummary === null
+        ? "нет результатов для текущих фильтров"
+        : "запрос коэффициентов...";
+
+      break;
+    }
+    case "/all": {
+      resultMessage = allCoefficients;
 
       break;
     }

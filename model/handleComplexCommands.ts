@@ -4,7 +4,9 @@ import { Filters } from ".";
 function handleComplexCommands(message: string, filters: Filters) {
   const [command, value] = message.split("=");
   if (command === "/coef") {
-    const intValue = parseInt(value.substring(1), 10);
+    const intValue = parseInt(value, 10)
+      ? parseInt(value, 10)
+      : parseInt(value.substring(1), 10);
     if (isNaN(intValue)) return "Invalid value";
     if (intValue === -1) {
       filters.coefficient = { value: null, sign: null };

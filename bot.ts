@@ -29,12 +29,14 @@ const ids = [targetId, myId];
 
 let prevCheck: WarehousesByDateByIdMap = {};
 let currentCheck: WarehousesByDateByIdMap = {};
-let checkSummary = "";
+let checkSummary: string | null = null;
+let allCoefficients: string = "";
 let lastCheckTime = "";
 let timeOutId: NodeJS.Timeout | string | number | undefined;
 
 const helpMessage = `Основные команды:
    \n/lastCheck - последний результат
+   \n/all - все коэффициенты
    \n/date=DD.MM.YYYY - только эта дата (пример: /date=01.01.2024)
    \n/date=-1 - все даты
    \n/coef=<1 - установка фильтра по коэффициенту (/coef=>5, /coef=0)
@@ -45,6 +47,7 @@ const bot = new Telegraf(key);
 
 bot.start((ctx) => {
   const id = ctx.update.message.from.id;
+  console.log(id, "started");
   if (!ids.includes(String(id))) ids.push(String(id));
   return ctx.reply(helpMessage);
 });
@@ -54,12 +57,19 @@ const doCheck = async () => {
   try {
     let chunkedDeviation: string[];
     lastCheckTime = getFormattedDateAsString();
-
-    ({ chunkedDeviation, checkSummary, currentCheck, prevCheck } =
-      await checkWarehouseCoefficients(currentCheck, prevCheck, filters));
-
+    console.log(filters);
+    ({
+      chunkedDeviation,
+      checkSummary,
+      currentCheck,
+      prevCheck,
+      allCoefficients,
+    } = await checkWarehouseCoefficients(currentCheck, prevCheck, filters));
+    console.log(chunkedDeviation.join("").length);
     ids.forEach((id) =>
-      chunkedDeviation.forEach((string) => bot.telegram.sendMessage(id, string))
+      chunkedDeviation.forEach((string) =>
+        bot.telegram.sendMessage(id, string || "---")
+      )
     );
 
     timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
@@ -76,6 +86,7 @@ bot.on("message", (ctx) => {
   try {
     if (!("text" in ctx.update.message)) return;
     const message = ctx.update.message.text.toLowerCase();
+    console.log(message);
 
     bot.telegram.sendMessage(
       myId,
@@ -88,15 +99,15 @@ bot.on("message", (ctx) => {
       const resultMessage = handleComplexCommands(message, filters);
       return ctx.reply(resultMessage);
     } else {
-      console.log(message);
       const chunkedMessage = handleBaseCommands(
         message,
         checkSummary,
         lastCheckTime,
         helpMessage,
+        allCoefficients,
         timeOutId
       );
-      chunkedMessage.forEach((string) => ctx.reply(string));
+      chunkedMessage.forEach((string) => ctx.reply(string || "---"));
     }
   } catch (e: any) {
     bot.telegram.sendMessage(myId, e.message || "someError");
