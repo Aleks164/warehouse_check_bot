@@ -61,7 +61,6 @@ bot.start((ctx) => {
   if (!ids.includes(String(id))) ids.push(String(id));
   return ctx.reply(helpMessage);
 });
-bot.launch();
 
 const doCheck = async () => {
   try {
@@ -166,6 +165,13 @@ bot.on("callback_query", (ctx) => {
       return;
   }
 });
+bot.catch((err, ctx) => {
+  bot.telegram.sendMessage(
+    myId,
+    ((err as any)?.message as string) || "someError"
+  );
+});
+bot.launch();
 
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
