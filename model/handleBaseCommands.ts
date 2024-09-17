@@ -29,10 +29,6 @@ function handleBaseCommands(
       resultMessage = "Bot stopped";
       break;
     }
-    case "/date": {
-      resultMessage = "check later";
-      break;
-    }
     case "/lastcheck": {
       resultMessage = checkSummary
         ? lastCheckTime + "\n" + checkSummary
@@ -48,8 +44,7 @@ function handleBaseCommands(
       break;
     }
     case "/help": {
-      resultMessage = helpMessage;
-      break;
+      return [helpMessage];
     }
     default: {
       resultMessage = "Unknown command";

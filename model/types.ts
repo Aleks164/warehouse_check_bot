@@ -11,6 +11,7 @@ export interface CoefficientFilter {
 export interface Filters {
   date: null | dayjs.Dayjs;
   coefficient: CoefficientFilter;
+  wh: null | string;
 }
 
 export interface WarehousesByDateMap {

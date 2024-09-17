@@ -26,6 +26,9 @@ function getFilteredCoefficients(
       )
         return acc;
     }
+    if (filters.wh) {
+      if (curr.warehouseName !== filters.wh) return acc;
+    }
 
     if (!acc[curr.warehouseID]) acc[curr.warehouseID] = {};
     acc[curr.warehouseID]![curr.date] = curr;

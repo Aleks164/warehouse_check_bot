@@ -1,19 +1,27 @@
 import { Telegraf } from "telegraf";
-import { getFormattedDateAsString } from "./utils";
+import {
+  getCoefficientMarkup,
+  getDateMarkup,
+  getFormattedDateAsString,
+  getWHMarkup,
+} from "./utils";
 import {
   Filters,
   WarehousesByDateByIdMap,
-  handleComplexCommands,
   checkWarehouseCoefficients,
   handleBaseCommands,
+  handleChangeCoefficientFIlter,
+  handleChangeDateFilter,
 } from "./model";
 import "dotenv/config";
+import handleChangeWHFilter from "./model/handleChangeWHFIlter";
 
 const key = process.env.BOT_TOKEN;
 const targetId = process.env.HANSTER_ID;
+const main = process.env.HANSTER_MAIN_ID;
 const myId = process.env.MY_ID;
 
-if (!key || !targetId || !myId)
+if (!key || !targetId || !myId || !main)
   throw new Error(
     "Bot token, target ID, or my ID not found in environment variables"
   );
@@ -23,31 +31,33 @@ const REQUEST_TIME_INTERVAL = 1000 * 12; // 12 second
 const filters: Filters = {
   date: null,
   coefficient: { value: null, sign: null },
+  wh: null,
 };
-const complexCommands = ["date", "coef"];
-const ids = [targetId, myId];
+const complexCommands = ["date", "coef", "wh"];
+const whList = ["Электросталь", "Казань", "Коледино", "Тула"];
+// const ids = [targetId, myId, main];
+const ids = [myId];
 
 let prevCheck: WarehousesByDateByIdMap = {};
 let currentCheck: WarehousesByDateByIdMap = {};
 let checkSummary: string | null = null;
 let allCoefficients: string = "";
 let lastCheckTime = "";
+let allDates: string[] = [];
 let timeOutId: NodeJS.Timeout | string | number | undefined;
 
 const helpMessage = `Основные команды:
    \n/lastCheck - последний результат
    \n/all - все коэффициенты
-   \n/date=DD.MM.YYYY - только эта дата (пример: /date=01.01.2024)
-   \n/date=-1 - все даты
-   \n/coef=<1 - установка фильтра по коэффициенту (/coef=>5, /coef=0)
-   \n/coef=-1 - отмена коэффициента фильтра
-   \n/help - Основные комманды`;
+   \n/date - установка фильтра по дате 
+   \n/coef - установка фильтра по коэффициенту  
+   \n/wh - установка фильтра по складу  
+   \n/help - Основные команды`;
 
 const bot = new Telegraf(key);
 
 bot.start((ctx) => {
   const id = ctx.update.message.from.id;
-  console.log(id, "started");
   if (!ids.includes(String(id))) ids.push(String(id));
   return ctx.reply(helpMessage);
 });
@@ -57,15 +67,14 @@ const doCheck = async () => {
   try {
     let chunkedDeviation: string[];
     lastCheckTime = getFormattedDateAsString();
-    console.log(filters);
     ({
       chunkedDeviation,
       checkSummary,
       currentCheck,
       prevCheck,
       allCoefficients,
+      allDates,
     } = await checkWarehouseCoefficients(currentCheck, prevCheck, filters));
-    console.log(chunkedDeviation.join("").length);
     ids.forEach((id) =>
       chunkedDeviation.forEach((string) =>
         bot.telegram.sendMessage(id, string || "---")
@@ -86,7 +95,6 @@ bot.on("message", (ctx) => {
   try {
     if (!("text" in ctx.update.message)) return;
     const message = ctx.update.message.text.toLowerCase();
-    console.log(message);
 
     bot.telegram.sendMessage(
       myId,
@@ -96,8 +104,19 @@ bot.on("message", (ctx) => {
     );
 
     if (complexCommands.some((template) => message.includes(template))) {
-      const resultMessage = handleComplexCommands(message, filters);
-      return ctx.reply(resultMessage);
+      switch (message) {
+        case "/coef":
+          return ctx.reply("коэффициент", getCoefficientMarkup());
+
+        case "/date":
+          return ctx.reply("дата", getDateMarkup(allDates));
+
+        case "/wh":
+          return ctx.reply("склад", getWHMarkup(whList));
+
+        default:
+          return ctx.reply("Unknown command");
+      }
     } else {
       const chunkedMessage = handleBaseCommands(
         message,
@@ -111,6 +130,39 @@ bot.on("message", (ctx) => {
     }
   } catch (e: any) {
     bot.telegram.sendMessage(myId, e.message || "someError");
+  }
+});
+
+bot.on("callback_query", (ctx) => {
+  if (!("data" in ctx.update.callback_query)) return;
+  const {
+    data,
+    message: { text },
+  } = ctx.update.callback_query as any;
+
+  const reset = () => {
+    prevCheck = {};
+    currentCheck = {};
+  };
+
+  switch (text) {
+    case "дата": {
+      const resultMessage = handleChangeDateFilter(data, filters, reset);
+      ctx.reply(resultMessage || "---");
+      return;
+    }
+    case "коэффициент": {
+      const resultMessage = handleChangeCoefficientFIlter(data, filters, reset);
+      ctx.reply(resultMessage || "---");
+      return;
+    }
+    case "склад": {
+      const resultMessage = handleChangeWHFilter(data, filters, reset);
+      ctx.reply(resultMessage || "---");
+      return;
+    }
+    default:
+      return;
   }
 });
 

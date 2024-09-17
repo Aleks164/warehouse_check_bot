@@ -17,8 +17,10 @@ const checkWarehouseCoefficients = async (
   filters: Filters
 ) => {
   const warehousesCoefficients = await getCoefficients(warehousesIds);
+
   let checkSummary = "";
   let allCoefficients = "";
+  let allDates: Set<string> = new Set();
   let chunkedDeviation: string[] = [];
 
   if (warehousesCoefficients.length) {
@@ -28,8 +30,10 @@ const checkWarehouseCoefficients = async (
       }${BORDER_ROW_TEMP}`;
       return acc;
     }, allCoefficients);
+    warehousesCoefficients.forEach((coef) => {
+      allDates.add(coef.date);
+    });
     const newMap = getFilteredCoefficients(warehousesCoefficients, filters);
-    console.log(Object.values(newMap));
     if (!Object.keys(prevCheck).length) prevCheck = newMap;
     else prevCheck = currentCheck;
     currentCheck = newMap;
@@ -49,6 +53,7 @@ const checkWarehouseCoefficients = async (
     currentCheck,
     prevCheck,
     allCoefficients,
+    allDates: Array.from(allDates),
   };
 };
 
