@@ -4,6 +4,7 @@ export { default as handleBaseCommands } from "./handleBaseCommands";
 export { default as checkWarehouseCoefficients } from "./checkWarehouseCoefficients";
 export { default as handleChangeDateFilter } from "./handleChangeDateFilter";
 export { default as handleChangeCoefficientFIlter } from "./handleChangeCoefficientFIlter";
+export { default as handleChangeWHFilter } from "./handleChangeWHFilter";
 
 export type {
   CoefficientSign,

@@ -12,9 +12,9 @@ import {
   handleBaseCommands,
   handleChangeCoefficientFIlter,
   handleChangeDateFilter,
+  handleChangeWHFilter,
 } from "./model";
 import "dotenv/config";
-import handleChangeWHFilter from "./model/handleChangeWHFIlter";
 
 const key = process.env.BOT_TOKEN;
 const targetId = process.env.HANSTER_ID;
@@ -134,43 +134,46 @@ bot.on("message", (ctx) => {
 });
 
 bot.on("callback_query", (ctx) => {
-  if (!("data" in ctx.update.callback_query)) return;
-  const {
-    data,
-    message: { text },
-  } = ctx.update.callback_query as any;
+  try {
+    if (!("data" in ctx.update.callback_query)) return;
+    const {
+      data,
+      message: { text },
+    } = ctx.update.callback_query as any;
 
-  const reset = () => {
-    prevCheck = {};
-    currentCheck = {};
-  };
+    const reset = () => {
+      prevCheck = {};
+      currentCheck = {};
+    };
 
-  switch (text) {
-    case "дата": {
-      const resultMessage = handleChangeDateFilter(data, filters, reset);
-      ctx.reply(resultMessage || "---");
-      return;
+    switch (text) {
+      case "дата": {
+        const resultMessage = handleChangeDateFilter(data, filters, reset);
+        ctx.reply(resultMessage || "---");
+        return;
+      }
+      case "коэффициент": {
+        const resultMessage = handleChangeCoefficientFIlter(
+          data,
+          filters,
+          reset
+        );
+        ctx.reply(resultMessage || "---");
+        return;
+      }
+      case "склад": {
+        const resultMessage = handleChangeWHFilter(data, filters, reset);
+        ctx.reply(resultMessage || "---");
+        return;
+      }
+      default:
+        return;
     }
-    case "коэффициент": {
-      const resultMessage = handleChangeCoefficientFIlter(data, filters, reset);
-      ctx.reply(resultMessage || "---");
-      return;
-    }
-    case "склад": {
-      const resultMessage = handleChangeWHFilter(data, filters, reset);
-      ctx.reply(resultMessage || "---");
-      return;
-    }
-    default:
-      return;
+  } catch (e: any) {
+    bot.telegram.sendMessage(myId, e.message || "some error");
   }
 });
-bot.catch((err, ctx) => {
-  bot.telegram.sendMessage(
-    myId,
-    ((err as any)?.message as string) || "someError"
-  );
-});
+
 bot.launch();
 
 process.once("SIGINT", () => bot.stop("SIGINT"));

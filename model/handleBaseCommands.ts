@@ -50,8 +50,8 @@ function handleBaseCommands(
       resultMessage = checkSummary
         ? lastCheckTime + "\n" + checkSummary
         : checkSummary === null
-        ? "нет результатов для текущих фильтров"
-        : "запрос коэффициентов...";
+        ? "запрос коэффициентов..."
+        : "нет результатов для текущих фильтров";
 
       break;
     }
