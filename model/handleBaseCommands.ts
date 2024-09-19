@@ -56,7 +56,8 @@ function handleBaseCommands(
       break;
     }
     case "/all": {
-      return [(resultMessage = lastCheckTime + "\n" + allCoefficients)];
+      resultMessage = lastCheckTime + BORDER_ROW_TEMP + allCoefficients;
+      break;
     }
     case "/help": {
       return [helpMessage];
