@@ -27,12 +27,7 @@ function getCheckSummary(
         } дата: ${new Date(coefficientItem.date).toLocaleString("ru-RU")} ${
           prevCoefficientItem?.coefficient || "-"
         } ---> ${coefficientItem.coefficient}${BORDER_ROW_TEMP}`;
-        console.log(
-          "-deviations",
-          deviations,
-          prevCoefficientItem?.coefficient,
-          coefficientItem.coefficient
-        );
+        console.log("-deviations", currentCheck);
       }
     }
   }
