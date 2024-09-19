@@ -1,6 +1,7 @@
 import { getChunkedString } from "../utils";
 import {
   BORDER_ROW,
+  BORDER_ROW_TEMP,
   MESSAGE_LENGTH_LIMIT,
   ROW_TEMPLATE_REPLACE_REG_EXP,
 } from "./const";
@@ -47,13 +48,12 @@ function handleBaseCommands(
       break;
     }
     case "/lastcheck": {
-      return [
-        (resultMessage = checkSummary
-          ? lastCheckTime + "\n" + checkSummary
-          : checkSummary === null
-          ? "запрос коэффициентов..."
-          : "нет результатов для текущих фильтров"),
-      ];
+      resultMessage = checkSummary
+        ? lastCheckTime + BORDER_ROW_TEMP + checkSummary
+        : checkSummary === null
+        ? "запрос коэффициентов..."
+        : "нет результатов для текущих фильтров";
+      break;
     }
     case "/all": {
       return [(resultMessage = lastCheckTime + "\n" + allCoefficients)];
