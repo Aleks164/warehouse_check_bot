@@ -47,18 +47,16 @@ function handleBaseCommands(
       break;
     }
     case "/lastcheck": {
-      resultMessage = checkSummary
-        ? lastCheckTime + "\n" + checkSummary
-        : checkSummary === null
-        ? "запрос коэффициентов..."
-        : "нет результатов для текущих фильтров";
-
-      break;
+      return [
+        (resultMessage = checkSummary
+          ? lastCheckTime + "\n" + checkSummary
+          : checkSummary === null
+          ? "запрос коэффициентов..."
+          : "нет результатов для текущих фильтров"),
+      ];
     }
     case "/all": {
-      resultMessage = allCoefficients;
-
-      break;
+      return [(resultMessage = lastCheckTime + "\n" + allCoefficients)];
     }
     case "/help": {
       return [helpMessage];

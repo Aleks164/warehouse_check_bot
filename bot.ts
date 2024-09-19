@@ -21,6 +21,7 @@ const targetId = process.env.HANSTER_ID;
 const main = process.env.HANSTER_MAIN_ID;
 const myId = process.env.MY_ID;
 
+
 if (!key || !targetId || !myId || !main)
   throw new Error(
     "Bot token, target ID, or my ID not found in environment variables"
