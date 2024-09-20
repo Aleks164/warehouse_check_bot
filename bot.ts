@@ -188,6 +188,7 @@ const doRunBot = async () => {
     runBot();
   } catch (e: any) {
     console.log(e.message);
+    clearTimeout(timeOutId);
     await sleep(10000);
     doRunBot();
   }
