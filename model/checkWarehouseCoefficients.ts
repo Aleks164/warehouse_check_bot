@@ -33,7 +33,11 @@ const checkWarehouseCoefficients = async (
     warehousesCoefficients.forEach((coef) => {
       allDates.add(coef.date);
     });
-    const newMap = getFilteredCoefficients(warehousesCoefficients, filters);
+    const newMap = getFilteredCoefficients(
+      warehousesCoefficients,
+      filters,
+      prevCheck
+    );
     if (!Object.keys(prevCheck).length) prevCheck = newMap;
     else prevCheck = currentCheck;
     currentCheck = newMap;

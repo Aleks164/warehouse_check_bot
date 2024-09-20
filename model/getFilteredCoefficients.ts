@@ -4,11 +4,15 @@ import { Filters, WarehousesByDateByIdMap } from "./types";
 
 function getFilteredCoefficients(
   warehousesCoefficients: WarehousesCoefficient[],
-  filters: Filters
+  filters: Filters,
+  prevCheck: WarehousesByDateByIdMap
 ) {
   return warehousesCoefficients.reduce<WarehousesByDateByIdMap>((acc, curr) => {
+    const date = curr.date;
+    const id = curr.warehouseID;
+    const prevCoef = prevCheck[id]?.[date];
     if (filters.date) {
-      const coefficientOnDate = dayjs(curr.date, { utc: true });
+      const coefficientOnDate = dayjs(date, { utc: true });
       const filterDate = filters.date;
 
       if (!coefficientOnDate.isSame(filterDate, "day")) return acc;
@@ -21,7 +25,14 @@ function getFilteredCoefficients(
           (filters.coefficient.sign === "<" &&
             curr.coefficient < filters.coefficient.value) ||
           (filters.coefficient.sign === "=" &&
-            +curr.coefficient === +filters.coefficient.value)
+            +curr.coefficient === +filters.coefficient.value) ||
+          (prevCoef &&
+            ((filters.coefficient.sign === ">" &&
+              prevCoef.coefficient > filters.coefficient.value) ||
+              (filters.coefficient.sign === "<" &&
+                prevCoef.coefficient < filters.coefficient.value) ||
+              (filters.coefficient.sign === "=" &&
+                +prevCoef.coefficient === +filters.coefficient.value)))
         )
       )
         return acc;
