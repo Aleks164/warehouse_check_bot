@@ -4,6 +4,7 @@ import {
   getDateMarkup,
   getFormattedDateAsString,
   getWHMarkup,
+  sleep,
 } from "./utils";
 import {
   Filters,
@@ -20,7 +21,6 @@ const key = process.env.BOT_TOKEN;
 const targetId = process.env.HANSTER_ID;
 const main = process.env.HANSTER_MAIN_ID;
 const myId = process.env.MY_ID;
-
 
 if (!key || !targetId || !myId || !main)
   throw new Error(
@@ -55,127 +55,140 @@ const helpMessage = `Основные команды:
    \n/filter - текущее фильтры  
    \n/help - Основные команды`;
 
-const bot = new Telegraf(key);
+const runBot = async () => {
+  const bot = new Telegraf(key);
 
-bot.start((ctx) => {
-  const id = ctx.update.message.from.id;
-  if (!ids.includes(String(id))) ids.push(String(id));
-  return ctx.reply(helpMessage);
-});
+  bot.start((ctx) => {
+    const id = ctx.update.message.from.id;
+    if (!ids.includes(String(id))) ids.push(String(id));
+    return ctx.reply(helpMessage);
+  });
 
-const doCheck = async () => {
-  try {
-    let chunkedDeviation: string[];
-    lastCheckTime = getFormattedDateAsString();
-    ({
-      chunkedDeviation,
-      checkSummary,
-      currentCheck,
-      prevCheck,
-      allCoefficients,
-      allDates,
-    } = await checkWarehouseCoefficients(currentCheck, prevCheck, filters));
-    ids.forEach((id) =>
-      chunkedDeviation.forEach((string) =>
-        bot.telegram.sendMessage(id, string || "---")
-      )
-    );
+  const doCheck = async () => {
+    try {
+      let chunkedDeviation: string[];
+      lastCheckTime = getFormattedDateAsString();
+      ({
+        chunkedDeviation,
+        checkSummary,
+        currentCheck,
+        prevCheck,
+        allCoefficients,
+        allDates,
+      } = await checkWarehouseCoefficients(currentCheck, prevCheck, filters));
+      ids.forEach((id) =>
+        chunkedDeviation.forEach((string) =>
+          bot.telegram.sendMessage(id, string || "---")
+        )
+      );
 
-    timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
-  } catch (e: any) {
-    bot.telegram.sendMessage(myId, e.message || "someError");
+      timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
+    } catch (e: any) {
+      bot.telegram.sendMessage(myId, e.message || "someError");
 
-    timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
-  }
+      timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
+    }
+  };
+
+  timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
+
+  bot.on("message", (ctx) => {
+    try {
+      if (!("text" in ctx.update.message)) return;
+      const message = ctx.update.message.text.toLowerCase();
+
+      bot.telegram.sendMessage(
+        myId,
+        (ctx.update.message.from.username ||
+          ctx.update.message.from.first_name) +
+          " : " +
+          message
+      );
+
+      if (complexCommands.some((template) => message.includes(template))) {
+        switch (message) {
+          case "/coef":
+            return ctx.reply("коэффициент", getCoefficientMarkup());
+
+          case "/date":
+            return ctx.reply("дата", getDateMarkup(allDates));
+
+          case "/wh":
+            return ctx.reply("склад", getWHMarkup(whList));
+
+          default:
+            return ctx.reply("Unknown command");
+        }
+      } else {
+        const chunkedMessage = handleBaseCommands(
+          message,
+          checkSummary,
+          lastCheckTime,
+          helpMessage,
+          allCoefficients,
+          filters,
+          timeOutId
+        );
+        chunkedMessage.forEach((string) => ctx.reply(string || "---"));
+      }
+    } catch (e: any) {
+      bot.telegram.sendMessage(myId, e.message || "someError");
+    }
+  });
+
+  bot.on("callback_query", (ctx) => {
+    try {
+      if (!("data" in ctx.update.callback_query)) return;
+      const {
+        data,
+        message: { text },
+      } = ctx.update.callback_query as any;
+
+      const reset = () => {
+        prevCheck = {};
+        currentCheck = {};
+      };
+
+      switch (text) {
+        case "дата": {
+          const resultMessage = handleChangeDateFilter(data, filters, reset);
+          ctx.reply(resultMessage || "---");
+          return;
+        }
+        case "коэффициент": {
+          const resultMessage = handleChangeCoefficientFIlter(
+            data,
+            filters,
+            reset
+          );
+          ctx.reply(resultMessage || "---");
+          return;
+        }
+        case "склад": {
+          const resultMessage = handleChangeWHFilter(data, filters, reset);
+          ctx.reply(resultMessage || "---");
+          return;
+        }
+        default:
+          return;
+      }
+    } catch (e: any) {
+      bot.telegram.sendMessage(myId, e.message || "some error");
+    }
+  });
+
+  bot.launch();
+
+  process.once("SIGINT", () => bot.stop("SIGINT"));
+  process.once("SIGTERM", () => bot.stop("SIGTERM"));
 };
 
-timeOutId = setTimeout(doCheck, REQUEST_TIME_INTERVAL);
-
-bot.on("message", (ctx) => {
+const doRunBot = async () => {
   try {
-    if (!("text" in ctx.update.message)) return;
-    const message = ctx.update.message.text.toLowerCase();
-
-    bot.telegram.sendMessage(
-      myId,
-      (ctx.update.message.from.username || ctx.update.message.from.first_name) +
-        " : " +
-        message
-    );
-
-    if (complexCommands.some((template) => message.includes(template))) {
-      switch (message) {
-        case "/coef":
-          return ctx.reply("коэффициент", getCoefficientMarkup());
-
-        case "/date":
-          return ctx.reply("дата", getDateMarkup(allDates));
-
-        case "/wh":
-          return ctx.reply("склад", getWHMarkup(whList));
-
-        default:
-          return ctx.reply("Unknown command");
-      }
-    } else {
-      const chunkedMessage = handleBaseCommands(
-        message,
-        checkSummary,
-        lastCheckTime,
-        helpMessage,
-        allCoefficients,
-        filters,
-        timeOutId
-      );
-      chunkedMessage.forEach((string) => ctx.reply(string || "---"));
-    }
+    runBot();
   } catch (e: any) {
-    bot.telegram.sendMessage(myId, e.message || "someError");
+    console.log(e.message);
+    await sleep(10000);
+    doRunBot();
   }
-});
-
-bot.on("callback_query", (ctx) => {
-  try {
-    if (!("data" in ctx.update.callback_query)) return;
-    const {
-      data,
-      message: { text },
-    } = ctx.update.callback_query as any;
-
-    const reset = () => {
-      prevCheck = {};
-      currentCheck = {};
-    };
-
-    switch (text) {
-      case "дата": {
-        const resultMessage = handleChangeDateFilter(data, filters, reset);
-        ctx.reply(resultMessage || "---");
-        return;
-      }
-      case "коэффициент": {
-        const resultMessage = handleChangeCoefficientFIlter(
-          data,
-          filters,
-          reset
-        );
-        ctx.reply(resultMessage || "---");
-        return;
-      }
-      case "склад": {
-        const resultMessage = handleChangeWHFilter(data, filters, reset);
-        ctx.reply(resultMessage || "---");
-        return;
-      }
-      default:
-        return;
-    }
-  } catch (e: any) {
-    bot.telegram.sendMessage(myId, e.message || "some error");
-  }
-});
-
-bot.launch();
-
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+};
