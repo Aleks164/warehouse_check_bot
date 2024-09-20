@@ -193,3 +193,5 @@ const doRunBot = async () => {
     doRunBot();
   }
 };
+
+doRunBot();
